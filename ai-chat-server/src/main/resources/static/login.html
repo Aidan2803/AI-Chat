@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Chat Test UI</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .auth-wrap {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          padding: 16px;
+        }
+        .auth-card {
+          width: 100%;
+          max-width: 360px;
+          background: #fff;
+          border: 1px solid #dde2f0;
+          border-radius: 12px;
+          padding: 24px;
+          display: grid;
+          gap: 12px;
+        }
+        .auth-card h1 { margin: 0 0 4px; font-size: 22px; }
+        .auth-card form { display: grid; gap: 10px; }
+        .auth-card label { display: grid; gap: 4px; font-size: 14px; }
+        .notice { margin: 0; padding: 10px; border-radius: 8px; font-size: 14px; display: none; }
+        .notice.error { display: block; background: #fdecea; color: #b42318; }
+        .notice.success { display: block; background: #e7f6ec; color: #176f2c; }
+    </style>
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1>Sign in</h1>
+
+        <p id="notice" class="notice"></p>
+
+        <!-- Spring Security handles POST /login (see SecurityConfig) -->
+        <form method="post" action="/login">
+            <label>
+                Username
+                <input type="text" name="username" required autofocus autocomplete="username">
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" required autocomplete="current-password">
+            </label>
+
+            <!-- filled in by the script below from the XSRF-TOKEN cookie -->
+            <input type="hidden" name="_csrf" id="csrf">
+
+            <button type="submit">Log in</button>
+        </form>
+
+        <p style="margin:0;font-size:14px;">No account? <a href="/register.html">Register</a></p>
+    </div>
+</div>
+
+<script>
+    // 1) CSRF token: Spring puts it in the XSRF-TOKEN cookie, the form must send it back.
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('XSRF-TOKEN='));
+    if (cookie) {
+      document.getElementById('csrf').value = decodeURIComponent(cookie.split('=')[1]);
+    }
+
+    // 2) Messages based on the query string (?error / ?logout)
+    const params = new URLSearchParams(window.location.search);
+    const notice = document.getElementById('notice');
+    if (params.has('error')) {
+      notice.textContent = 'Invalid username or password.';
+      notice.className = 'notice error';
+    } else if (params.has('logout')) {
+      notice.textContent = 'You have been logged out.';
+      notice.className = 'notice success';
+    } else if (params.has('registered')) {
+      notice.textContent = 'Account created. Please log in.';
+      notice.className = 'notice success';
+    }
+</script>
+</body>
+</html>

@@ -146,3 +146,21 @@ button:disabled {
   min-height: 20px;
   color: #b42318;
 }
+
+.user-box {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #2a3554;
+  display: grid;
+  gap: 8px;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #cdd4e7;
+  word-break: break-all;
+}
+
+button.secondary {
+  background: #2a3554;
+}

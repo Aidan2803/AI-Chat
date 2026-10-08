@@ -14,6 +14,8 @@ const elements = {
   messageInput: document.getElementById("message-input"),
   sendButton: document.getElementById("send-btn"),
   deleteConversationButton: document.getElementById("delete-conversation-btn"),
+  logoutButton: document.getElementById("logout-btn"),
+  currentUsername: document.getElementById("current-username"),
   status: document.getElementById("status"),
 };
 
@@ -21,13 +23,48 @@ function setStatus(message = "") {
   elements.status.textContent = message;
 }
 
+// Spring Security stores the CSRF token in the XSRF-TOKEN cookie.
+// Every request that changes data (POST/PUT/DELETE) must send it back in a header.
+function csrfToken() {
+  const cookie = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("XSRF-TOKEN="));
+  return cookie ? decodeURIComponent(cookie.split("=")[1]) : "";
+}
+
+function redirectToLogin() {
+  window.location.href = "/login.html";
+}
+
 async function request(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  const method = (options.method || "GET").toUpperCase();
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (method !== "GET" && method !== "HEAD") {
+    headers["X-XSRF-TOKEN"] = csrfToken();
+  }
+
+  const response = await fetch(path, { ...options, headers });
+
+  // Session expired: Spring redirected the request to the login page (HTML),
+  // or an API endpoint answered 401.
+  if (
+    (response.redirected && response.url.includes("/login.html")) ||
+    response.status === 401
+  ) {
+    redirectToLogin();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error(
+        "Request rejected (403). Security token missing or invalid, try reloading the page."
+      );
+    }
     const text = await response.text();
     throw new Error(text || `Request failed with ${response.status}`);
   }
@@ -201,11 +238,31 @@ elements.deleteConversationButton.addEventListener("click", async () => {
   }
 });
 
+// Logout: POST /logout is handled by Spring Security (needs the CSRF header too).
+if (elements.logoutButton) {
+  elements.logoutButton.addEventListener("click", async () => {
+    try {
+      await fetch("/logout", {
+        method: "POST",
+        headers: { "X-XSRF-TOKEN": csrfToken() },
+      });
+    } finally {
+      window.location.href = "/login.html?logout";
+    }
+  });
+}
+
+async function loadCurrentUser() {
+  const me = await request("/chat/me");
+  elements.currentUsername.textContent = me.username;
+}
+
 async function init() {
   setConversationControlsEnabled(false);
   elements.messages.textContent = "Create or select a conversation to begin.";
 
   try {
+    await loadCurrentUser();
     await loadConversations();
   } catch (error) {
     setStatus(`Failed to load conversations: ${error.message}`);

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - AI Chat Test UI</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .auth-wrap {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          padding: 16px;
+        }
+        .auth-card {
+          width: 100%;
+          max-width: 360px;
+          background: #fff;
+          border: 1px solid #dde2f0;
+          border-radius: 12px;
+          padding: 24px;
+          display: grid;
+          gap: 12px;
+        }
+        .auth-card h1 { margin: 0 0 4px; font-size: 22px; }
+        .auth-card form { display: grid; gap: 10px; }
+        .auth-card label { display: grid; gap: 4px; font-size: 14px; }
+        .auth-card p.switch { margin: 0; font-size: 14px; }
+        .notice { margin: 0; padding: 10px; border-radius: 8px; font-size: 14px; display: none; }
+        .notice.error { display: block; background: #fdecea; color: #b42318; }
+    </style>
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1>Register</h1>
+
+        <p id="notice" class="notice"></p>
+
+        <form id="register-form">
+            <label>
+                Username
+                <input id="username" type="text" required minlength="3" autofocus autocomplete="username">
+            </label>
+            <label>
+                Password
+                <input id="password" type="password" required minlength="6" autocomplete="new-password">
+            </label>
+            <label>
+                Confirm password
+                <input id="confirm" type="password" required minlength="6" autocomplete="new-password">
+            </label>
+            <button id="submit-btn" type="submit">Register</button>
+        </form>
+
+        <p class="switch">Already have an account? <a href="/login.html">Log in</a></p>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('register-form');
+    const notice = document.getElementById('notice');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // Spring stores the CSRF token in the XSRF-TOKEN cookie; we send it back in a header.
+    function csrfToken() {
+      const c = document.cookie.split('; ').find(c => c.startsWith('XSRF-TOKEN='));
+      return c ? decodeURIComponent(c.split('=')[1]) : '';
+    }
+
+    function showError(message) {
+      notice.textContent = message;   // textContent (not innerHTML) so server text can't inject HTML
+      notice.className = 'notice error';
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();           // stop the browser's normal form submission
+      notice.className = 'notice';      // hide old message
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+
+      if (password !== confirm) {
+        showError('Passwords do not match.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': csrfToken()
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.status === 201) {
+          window.location.href = '/login.html?registered';
+          return;
+        }
+
+        // 400 / 409: the server sends a plain-text reason in the body
+        const text = await res.text();
+        if (res.status === 403) {
+          showError('Request rejected (security token missing). Reload the page and try again.');
+        } else {
+          showError(text || 'Registration failed (HTTP ' + res.status + ').');
+        }
+      } catch (err) {
+        showError('Could not reach the server.');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+</script>
+</body>
+</html>

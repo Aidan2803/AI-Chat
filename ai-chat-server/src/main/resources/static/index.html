@@ -1,39 +1,44 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Chat Test UI</title>
-  <link rel="stylesheet" href="/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Test UI</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="layout">
+<div class="layout">
     <aside class="sidebar">
-      <h1>Conversations</h1>
-      <form id="create-conversation-form" class="create-form">
-        <input id="conversation-title" type="text" placeholder="New conversation title" required>
-        <button type="submit">Create</button>
-      </form>
-      <ul id="conversation-list" class="conversation-list"></ul>
+        <h1>Conversations</h1>
+        <form id="create-conversation-form" class="create-form">
+            <input id="conversation-title" type="text" placeholder="New conversation title" required>
+            <button type="submit">Create</button>
+        </form>
+        <ul id="conversation-list" class="conversation-list"></ul>
+
+        <div class="user-box">
+            <span class="user-name">Signed in as <strong id="current-username">...</strong></span>
+            <button id="logout-btn" type="button" class="secondary">Log out</button>
+        </div>
     </aside>
 
     <main class="chat-panel">
-      <header class="chat-header">
-        <h2 id="chat-title">Select a conversation</h2>
-        <button id="delete-conversation-btn" class="danger" disabled>Delete</button>
-      </header>
+        <header class="chat-header">
+            <h2 id="chat-title">Select a conversation</h2>
+            <button id="delete-conversation-btn" class="danger" disabled>Delete</button>
+        </header>
 
-      <section id="messages" class="messages"></section>
+        <section id="messages" class="messages"></section>
 
-      <form id="send-form" class="send-form">
-        <input id="message-input" type="text" placeholder="Type a message..." required disabled>
-        <button id="send-btn" type="submit" disabled>Send</button>
-      </form>
+        <form id="send-form" class="send-form">
+            <input id="message-input" type="text" placeholder="Type a message..." required disabled>
+            <button id="send-btn" type="submit" disabled>Send</button>
+        </form>
 
-      <p id="status" class="status"></p>
+        <p id="status" class="status"></p>
     </main>
-  </div>
+</div>
 
-  <script src="/app.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>
