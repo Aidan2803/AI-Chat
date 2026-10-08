@@ -2,6 +2,9 @@ package com.ether.ai_chat_server.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "app_user")
 public class ApplicationUser {
@@ -16,7 +19,10 @@ public class ApplicationUser {
     @Column(nullable = false)
     private String role = "USER";
 
-    protected  ApplicationUser(){};
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Conversation> conversations = new ArrayList<>();
+
+    protected ApplicationUser(){};
 
     public ApplicationUser(String username, String passwordHash){
         this.username = username;

@@ -16,8 +16,14 @@ public class Conversation {
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private ApplicationUser user;
+
     public void setTitle(String title){this.title = title;}
     public String getTitle(){return title;}
     public Long getId(){return id;}
     public List<Message> getMessages(){ return messages; }
+    public void setUser(ApplicationUser user) {this.user = user; }
+    public ApplicationUser getUser(){return user;}
 }

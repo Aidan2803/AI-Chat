@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.ether.ai_chat_server.service.ChatService;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,27 +19,27 @@ public class ChatController {
     }
 
     @GetMapping("/conversations")
-    public List<ConversationResponse> allConversations(){ return chatService.getAllConversations();}
+    public List<ConversationResponse> allConversations( Principal principal){ return chatService.getAllConversations(principal.getName());}
 
     @GetMapping("/conversation/{id}")
-    public List<MessageResponse> conversationHistory(@PathVariable Long id){
+    public List<MessageResponse> conversationHistory(@PathVariable Long id, Principal principal){
         return chatService.buildResponseHistory(id);
     }
 
     @PostMapping("/conversation/create")
-    public ConversationResponse createConversation(@RequestBody ConversationRequest request){
-        Conversation conversation = chatService.createConversation(request.title());
+    public ConversationResponse createConversation(@RequestBody ConversationRequest request, Principal principal){
+        Conversation conversation = chatService.createConversation(request.title(), principal.getName());
         return new ConversationResponse(conversation.getId(), conversation.getTitle());
     }
 
     @PostMapping("/conversation/{id}/sendMessage")
-    public ChatResponse sendMessageToConversation(@PathVariable Long id, @RequestBody ChatRequest request){
+    public ChatResponse sendMessageToConversation(@PathVariable Long id, @RequestBody ChatRequest request, Principal principal){
         String reply = chatService.processMessage(request.message(), id);
         return new ChatResponse(reply, id);
     }
 
     @DeleteMapping("/conversation/{id}/delete")
-    public ResponseEntity<Void> deleteConversation(@PathVariable Long id){
+    public ResponseEntity<Void> deleteConversation(@PathVariable Long id, Principal principal){
         chatService.deleteConversation(id);
         return ResponseEntity.noContent().build();
     }

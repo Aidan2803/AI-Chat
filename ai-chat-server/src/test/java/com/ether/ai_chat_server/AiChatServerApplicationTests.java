@@ -4,8 +4,10 @@ import com.ether.ai_chat_server.client.AIClient;
 import com.ether.ai_chat_server.client.FakeAIClient;
 import com.ether.ai_chat_server.dto.ConversationResponse;
 import com.ether.ai_chat_server.exceptions.ConversationNotFoundException;
+import com.ether.ai_chat_server.model.ApplicationUser;
 import com.ether.ai_chat_server.model.Conversation;
 import com.ether.ai_chat_server.model.Message;
+import com.ether.ai_chat_server.repository.ApplicationUserRepository;
 import com.ether.ai_chat_server.repository.ConversationRepository;
 import com.ether.ai_chat_server.repository.MessageRepository;
 import com.ether.ai_chat_server.service.ChatService;
@@ -37,9 +39,12 @@ class AiChatServerApplicationTests {
 	@Mock
 	public ConversationRepository conversationRepository;
 
+    @Mock
+    public ApplicationUserRepository userRepository;
+
 	@BeforeEach
 	void setUp(){
-		chatService = new ChatService(aiClient, conversationRepository, messageRepository);
+		chatService = new ChatService(aiClient, conversationRepository, messageRepository, userRepository);
 	}
 
 	@Test
@@ -76,13 +81,18 @@ class AiChatServerApplicationTests {
 	@Test
 	void createConversationWorks() {
 		String title = "New conversation";
+        String username = "user1";
+        String dummyHash = "dummyHash111";
 
-		Conversation savedConversation = new Conversation();
-		savedConversation.setTitle(title);
+        Conversation savedConversation = new Conversation();
+        savedConversation.setTitle(title);
+
+        ApplicationUser savedUser = new ApplicationUser(username, dummyHash);
 
 		when(conversationRepository.save(any())).thenReturn(savedConversation);
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(savedUser));
 
-		Conversation conversation = chatService.createConversation(title);
+		Conversation conversation = chatService.createConversation(title, username);
 
 		verify(conversationRepository, times(1)).save(any());
 		assertEquals(title, conversation.getTitle());

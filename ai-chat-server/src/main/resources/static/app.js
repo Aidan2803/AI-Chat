@@ -2,6 +2,7 @@ const state = {
   conversations: [],
   selectedConversationId: null,
   selectedConversationTitle: null,
+  currentUsername: "You",
 };
 
 const elements = {
@@ -123,7 +124,7 @@ function renderMessages(messages) {
 
     const meta = document.createElement("span");
     meta.className = "meta";
-    meta.textContent = role.toUpperCase();
+    meta.textContent = role === "user" ? state.currentUsername : "AI";
 
     const text = document.createElement("div");
     text.textContent = message.text;
@@ -254,6 +255,7 @@ if (elements.logoutButton) {
 
 async function loadCurrentUser() {
   const me = await request("/chat/me");
+  state.currentUsername = me.username;
   elements.currentUsername.textContent = me.username;
 }
 
