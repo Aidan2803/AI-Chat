@@ -1,6 +1,7 @@
 package com.ether.ai_chat_server.service;
 
 import com.ether.ai_chat_server.client.AIClient;
+import com.ether.ai_chat_server.dto.ChatChunk;
 import com.ether.ai_chat_server.dto.ConversationResponse;
 import com.ether.ai_chat_server.dto.MessageResponse;
 import com.ether.ai_chat_server.exceptions.ConversationNotFoundException;
@@ -14,7 +15,9 @@ import com.ether.ai_chat_server.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatService {
@@ -43,7 +46,14 @@ public class ChatService {
 
         return messageRepository.findByConversationIdOrderByIdAsc(conversationID)
                 .stream()
-                .map(m -> new MessageResponse(m.getId(), m.getText())).toList();
+                .map(m -> new MessageResponse(m.getId(), m.getText(), m.getMessageType())).toList();
+    }
+
+
+    private List<ChatChunk> buildChatChunkListFromHistory(Long conversationID){
+        return messageRepository.findByConversationIdOrderByIdAsc(conversationID)
+                .stream()
+                .map(m -> new ChatChunk(m.getMessageType(), m.getText())).collect(Collectors.toList());
     }
 
     @Transactional
@@ -53,7 +63,11 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationID)
                     .orElseThrow(() -> new ConversationNotFoundException("Conversation not found"));
 
-        String serverResponse = aiClient.ask(message);
+        ChatChunk chatChunk = new ChatChunk(MessageType.user, message);
+        List<ChatChunk> messages = buildChatChunkListFromHistory(conversationID);
+        messages.add(chatChunk);
+
+        String serverResponse = aiClient.ask(messages);
 
         createAndSaveMessage(message, conversation, MessageType.user);
         createAndSaveMessage(serverResponse, conversation, MessageType.ai);

@@ -1,9 +1,11 @@
 package com.ether.ai_chat_server.client;
 
+import com.ether.ai_chat_server.dto.ChatChunk;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Component
@@ -19,7 +21,7 @@ public class FakeAIClient implements AIClient {
     }
 
     @Override
-    public String ask(String message){
-        return "What a great question `" + message + "` "+ randomResponsesList.get(rand.nextInt(4));
+    public String ask(List<ChatChunk> conversation){
+        return "What a great question `" + conversation.get(conversation.size() - 1) + "` "+ randomResponsesList.get(rand.nextInt(4));
     }
 }

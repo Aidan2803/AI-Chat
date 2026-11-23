@@ -1,12 +1,13 @@
 package com.ether.ai_chat_server;
 
-import com.ether.ai_chat_server.client.AIClient;
 import com.ether.ai_chat_server.client.FakeAIClient;
+import com.ether.ai_chat_server.dto.ChatChunk;
 import com.ether.ai_chat_server.dto.ConversationResponse;
 import com.ether.ai_chat_server.exceptions.ConversationNotFoundException;
 import com.ether.ai_chat_server.model.ApplicationUser;
 import com.ether.ai_chat_server.model.Conversation;
 import com.ether.ai_chat_server.model.Message;
+import com.ether.ai_chat_server.model.enums.MessageType;
 import com.ether.ai_chat_server.repository.ApplicationUserRepository;
 import com.ether.ai_chat_server.repository.ConversationRepository;
 import com.ether.ai_chat_server.repository.MessageRepository;
@@ -18,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +60,9 @@ class AiChatServerApplicationTests {
 
 		String response = chatService.processMessage(messageToProcess, 1L);
 
-		verify(aiClient, times(1)).ask(messageToProcess);
+        List<ChatChunk> listOfTestMessages = new ArrayList<>(List.of(new ChatChunk(MessageType.user, messageToProcess)));
+
+		verify(aiClient, times(1)).ask(listOfTestMessages);
 		verify(messageRepository, times(2)).save(messageArgumentCaptor.capture());
 
 		List<Message> capturedMessage = messageArgumentCaptor.getAllValues();
@@ -100,6 +104,11 @@ class AiChatServerApplicationTests {
 
 	@Test
 	void getAllConversationsWorks(){
+        String dummyUser = "dummyUser";
+        String dummyHash = "dummyHash";
+
+        ApplicationUser user = new ApplicationUser(dummyUser, dummyHash);
+
 		Conversation c1 = new Conversation();
 		c1.setTitle("Conversation1");
 		Conversation c2 = new Conversation();
@@ -107,9 +116,10 @@ class AiChatServerApplicationTests {
 		Conversation c3 = new Conversation();
 		c2.setTitle("Conversation3");
 
-		when(conversationRepository.findAll()).thenReturn(List.of(c1, c2, c3));
+        when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
+		when(conversationRepository.findByUserUsername(user.getUsername())).thenReturn(List.of(c1, c2, c3));
 
-		List<ConversationResponse> conversationResponses = chatService.getAllConversations();
+		List<ConversationResponse> conversationResponses = chatService.getAllConversations(user.getUsername());
 
 		int expectedResultSize = 3;
 
@@ -119,9 +129,15 @@ class AiChatServerApplicationTests {
 
 	@Test
 	void emptyGetAllConversation(){
-		when(conversationRepository.findAll()).thenReturn(List.of());
+        String dummyUser = "dummyUser";
+        String dummyHash = "dummyHash";
 
-		List<ConversationResponse> conversationResponses = chatService.getAllConversations();
+        ApplicationUser user = new ApplicationUser(dummyUser, dummyHash);
+
+        when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
+        when(conversationRepository.findByUserUsername(user.getUsername())).thenReturn(List.of());
+
+		List<ConversationResponse> conversationResponses = chatService.getAllConversations(user.getUsername());
 
 		int expectedResultSize = 0;
 

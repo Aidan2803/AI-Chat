@@ -117,8 +117,8 @@ function renderMessages(messages) {
     return;
   }
 
-  messages.forEach((message, index) => {
-    const role = index % 2 === 0 ? "user" : "ai";
+  messages.forEach((message) => {
+    const role = message.type;
     const wrapper = document.createElement("article");
     wrapper.className = `message ${role}`;
 
