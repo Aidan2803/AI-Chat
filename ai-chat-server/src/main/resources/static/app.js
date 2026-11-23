@@ -126,10 +126,19 @@ function renderMessages(messages) {
     meta.className = "meta";
     meta.textContent = role === "user" ? state.currentUsername : "AI";
 
+    const timestamp = document.createElement("time");
+    timestamp.className = "timestamp";
+    timestamp.dateTime = message.createdAt;
+    timestamp.textContent = new Intl.DateTimeFormat(undefined, {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(new Date(message.createdAt));
+
     const text = document.createElement("div");
     text.textContent = message.text;
 
     wrapper.appendChild(meta);
+    wrapper.appendChild(timestamp);
     wrapper.appendChild(text);
     elements.messages.appendChild(wrapper);
   });

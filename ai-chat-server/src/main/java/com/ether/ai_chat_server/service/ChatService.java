@@ -46,7 +46,7 @@ public class ChatService {
 
         return messageRepository.findByConversationIdOrderByIdAsc(conversationID)
                 .stream()
-                .map(m -> new MessageResponse(m.getId(), m.getText(), m.getMessageType())).toList();
+                .map(m -> new MessageResponse(m.getId(), m.getText(), m.getMessageType(), m.getCreatedAt())).toList();
     }
 
 

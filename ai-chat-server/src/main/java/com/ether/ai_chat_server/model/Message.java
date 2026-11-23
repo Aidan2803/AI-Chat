@@ -32,5 +32,6 @@ public class Message {
 
     public Long getId(){return id;}
     public String getText(){return text;}
+    public Instant getCreatedAt(){return createdAt;}
     public MessageType getMessageType(){return  messageType;}
 }
