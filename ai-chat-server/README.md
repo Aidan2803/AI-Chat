@@ -1,114 +1,86 @@
-# AI Chat Server + Built-in Test UI
+﻿# AI Chat Server
 
-This project now includes a **browser UI for manual backend testing**.
+A Spring Boot chat application with a browser UI, PostgreSQL, and Ollama. Docker Compose runs the complete stack so Windows, macOS, and Linux developers use the same database, model server, and ports.
 
-The UI is a zero-build frontend (HTML/CSS/JavaScript) served directly by Spring Boot from:
+## Quick start (recommended)
 
-- `src/main/resources/static/index.html`
-- `src/main/resources/static/app.js`
-- `src/main/resources/static/styles.css`
+Install Docker Desktop (Windows/macOS) or Docker Engine with Compose (Linux), then run from the repository root:
 
-When the backend is running, open **http://localhost:8080/** to use it.
-
----
-
-## What this UI can do
-
-It is wired to your current backend endpoints:
-
-| Action | Method | Endpoint |
-|---|---|---|
-| List conversations | GET | `/chat/conversations` |
-| Get conversation history | GET | `/chat/conversation/{id}` |
-| Create conversation | POST | `/chat/conversation/create` |
-| Send message | POST | `/chat/conversation/{id}/sendMessage` |
-| Delete conversation | DELETE | `/chat/conversation/{id}/delete` |
-
-Features in UI:
-
-1. Create a conversation by title.
-2. Select an existing conversation.
-3. Send messages and see AI replies.
-4. Load existing message history.
-5. Delete a conversation.
-
----
-
-## Prerequisites
-
-1. **Java 17+**
-2. **PostgreSQL** running locally
-3. (Optional) IDE like IntelliJ
-
----
-
-## Database setup
-
-Current backend config in `src/main/resources/application.properties` expects:
-
-- DB: `ai_chat`
-- User: `ai_chat_user`
-- Password: `Chlprc1403`
-- URL: `jdbc:postgresql://localhost:5432/ai_chat`
-
-Create them in PostgreSQL, or edit `application.properties` to your own values.
-
-Example SQL:
-
-```sql
-CREATE DATABASE ai_chat;
-CREATE USER ai_chat_user WITH PASSWORD 'Chlprc1403';
-GRANT ALL PRIVILEGES ON DATABASE ai_chat TO ai_chat_user;
+```bash
+docker compose up --build
 ```
 
----
+The first start downloads the Ollama model and can take several minutes. Open:
 
-## Run the backend (and UI)
+- UI: http://localhost:8080/
+- Ollama: http://localhost:11434/
+- PostgreSQL: `localhost:5432`
 
-From project root (`ai-chat-server` folder containing `pom.xml`):
+Compose waits for PostgreSQL and Ollama model installation before starting the application. Database and model data are persisted in named Docker volumes. On this branch, Hibernate's existing `ddl-auto=update` setting manages the development schema.
+
+Stop the stack with:
+
+```bash
+docker compose down
+```
+
+To reset PostgreSQL and Ollama data (destructive):
+
+```bash
+docker compose down -v
+```
+
+## Configuration
+
+Defaults work without a `.env` file. To customize ports, credentials, model, or the system prompt, copy `.env.example` to `.env` in the repository root. On Windows PowerShell:
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+Copy-Item .env.example .env
 ```
 
-After startup:
+On macOS/Linux use `cp .env.example .env`. Edit `.env`, then recreate the stack with `docker compose up --build`.
 
-- Backend API base: `http://localhost:8080/chat`
-- UI: `http://localhost:8080/`
+Useful settings:
 
----
+| Variable | Default | Purpose |
+|---|---|---|
+| `APP_PORT` | `8080` | Host port for the browser UI |
+| `POSTGRES_PORT` | `5432` | Host port for PostgreSQL |
+| `OLLAMA_PORT` | `11434` | Host port for Ollama |
+| `OLLAMA_MODEL` | `llama3.2:3b` | Model downloaded at startup |
+| `POSTGRES_PASSWORD` | local-only default | Change for shared/non-local deployments |
+| `AI_SYSTEM_PROMPT` | empty | Optional system prompt |
 
-## How to use the UI for testing
+The Compose setup uses CPU by default and therefore works without a GPU. Nvidia GPU acceleration can be added with a Docker Compose override and a compatible GPU-enabled Docker installation.
 
-1. Open `http://localhost:8080/`.
-2. In the left panel, type a title and click **Create**.
-3. Click the created conversation in the list.
-4. Type a message in the input box and click **Send**.
-5. Repeat to test multi-turn conversations.
-6. Use **Delete** to remove a conversation and its messages.
+## Development without Docker
 
----
+Requirements: Java 17, Maven-compatible network access, PostgreSQL, and Ollama. Configure the application with environment variables rather than editing committed files:
 
-## Notes and limitations
+```bash
+DB_URL=jdbc:postgresql://localhost:5432/ai_chat
+DB_USERNAME=ai_chat_user
+DB_PASSWORD=your-password
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2:3b
+```
 
-1. The message history endpoint currently returns only `{ id, text }` without sender type, so the UI infers roles as alternating `USER/AI` order.
-2. No authentication is implemented (UI is intended for local testing).
-3. Error messages from failed API calls are shown at the bottom of the page.
+Then run:
 
----
+```bash
+./mvnw spring-boot:run
+```
 
-## Troubleshooting
+On Windows use `mvnw.cmd spring-boot:run`. Ensure PostgreSQL and Ollama are already running.
 
-### UI does not load
+## Verify the setup
 
-- Make sure Spring Boot started without errors.
-- Confirm `http://localhost:8080/` is reachable.
+```bash
+docker compose ps
+docker compose logs app
+docker compose exec ollama ollama list
+```
 
-### API/database errors in UI
+## API/UI features
 
-- Check backend console logs.
-- Verify PostgreSQL is running and credentials in `application.properties` are correct.
-
-### Port already in use
-
-- Stop the process using port `8080` or configure a different Spring port.
+The UI supports registering/login, listing, creating, deleting, and viewing conversations, and sending messages to the configured Ollama model. The backend and zero-build frontend are both served at `http://localhost:8080/`.

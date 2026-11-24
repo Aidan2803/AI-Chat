@@ -24,7 +24,7 @@ public class OllamaClient implements  AIClient{
 
     public OllamaClient(
             @Value("${ai.ollama.base-url:http://localhost:11434}") String baseUrl,
-            @Value("${ai.ollama.model:llama3.2:3b)}") String model,
+            @Value("${ai.ollama.model:llama3.2:3b}") String model,
             @Value("${ai.ollama.system-prompt:}") String systemPrompt
     ){
         SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
