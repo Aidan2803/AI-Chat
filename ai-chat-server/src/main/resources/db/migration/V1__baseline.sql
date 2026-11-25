@@ -1,9 +1,6 @@
 --
 -- PostgreSQL database dump
 --
-
-\restrict fpCHp9pIfCnFQ8b2HgOjigtX4DhPfo2nbHzat6d8OVdMUdefbqgnhvXtb6bhDHw
-
 -- Dumped from database version 14.24 (Ubuntu 14.24-0ubuntu0.22.04.1)
 -- Dumped by pg_dump version 14.24 (Ubuntu 14.24-0ubuntu0.22.04.1)
 
@@ -152,5 +149,3 @@ ALTER TABLE ONLY public.conversation
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict fpCHp9pIfCnFQ8b2HgOjigtX4DhPfo2nbHzat6d8OVdMUdefbqgnhvXtb6bhDHw
