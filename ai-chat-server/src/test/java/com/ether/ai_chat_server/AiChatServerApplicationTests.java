@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -117,7 +118,7 @@ class AiChatServerApplicationTests {
 		c2.setTitle("Conversation3");
 
         when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
-		when(conversationRepository.findByUserUsername(user.getUsername())).thenReturn(List.of(c1, c2, c3));
+		when(conversationRepository.findByUserUsernameOrderByCreatedAtDesc(user.getUsername())).thenReturn(List.of(c1, c2, c3));
 
 		List<ConversationResponse> conversationResponses = chatService.getAllConversations(user.getUsername());
 
@@ -128,6 +129,31 @@ class AiChatServerApplicationTests {
 	}
 
 	@Test
+	void getAllConversationsReturnsOldestFirst(){
+		ApplicationUser user = new ApplicationUser("dummyUser", "dummyHash");
+		Conversation older = mock(Conversation.class);
+		Conversation newer = mock(Conversation.class);
+		Instant olderCreatedAt = Instant.parse("2026-01-01T10:00:00Z");
+		Instant newerCreatedAt = Instant.parse("2026-01-02T10:00:00Z");
+
+		when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
+		when(older.getTitle()).thenReturn("Older conversation");
+		when(older.getCreatedAt()).thenReturn(olderCreatedAt);
+		when(newer.getTitle()).thenReturn("Newer conversation");
+		when(newer.getCreatedAt()).thenReturn(newerCreatedAt);
+		when(conversationRepository.findByUserUsernameOrderByCreatedAtAsc("dummyUser"))
+				.thenReturn(List.of(older, newer));
+
+		List<ConversationResponse> result = chatService.getAllConversations("dummyUser", "asc");
+
+		assertEquals(List.of("Older conversation", "Newer conversation"),
+				result.stream().map(ConversationResponse::title).toList());
+		assertEquals(List.of(olderCreatedAt, newerCreatedAt),
+				result.stream().map(ConversationResponse::createdAt).toList());
+		verify(conversationRepository).findByUserUsernameOrderByCreatedAtAsc("dummyUser");
+	}
+
+	@Test
 	void emptyGetAllConversation(){
         String dummyUser = "dummyUser";
         String dummyHash = "dummyHash";
@@ -135,7 +161,7 @@ class AiChatServerApplicationTests {
         ApplicationUser user = new ApplicationUser(dummyUser, dummyHash);
 
         when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
-        when(conversationRepository.findByUserUsername(user.getUsername())).thenReturn(List.of());
+        when(conversationRepository.findByUserUsernameOrderByCreatedAtDesc(user.getUsername())).thenReturn(List.of());
 
 		List<ConversationResponse> conversationResponses = chatService.getAllConversations(user.getUsername());
 

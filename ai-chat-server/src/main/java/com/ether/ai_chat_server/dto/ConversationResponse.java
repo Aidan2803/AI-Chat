@@ -1,4 +1,6 @@
 package com.ether.ai_chat_server.dto;
 
-public record ConversationResponse(Long conversationID, String title) {
+import java.time.Instant;
+
+public record ConversationResponse(Long conversationID, String title, Instant createdAt) {
 }

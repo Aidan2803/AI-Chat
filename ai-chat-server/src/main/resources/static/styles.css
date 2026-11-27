@@ -46,6 +46,22 @@ button {
   padding: 10px;
 }
 
+select {
+  border-radius: 8px;
+  border: 1px solid #2a3554;
+  background: #1a2338;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.sort-control {
+  display: grid;
+  gap: 6px;
+  color: #cdd4e7;
+  font-size: 13px;
+}
+
 button {
   border: none;
   background: #315efb;

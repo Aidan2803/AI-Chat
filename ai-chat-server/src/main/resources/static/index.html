@@ -14,6 +14,13 @@
             <input id="conversation-title" type="text" placeholder="New conversation title" required>
             <button type="submit">Create</button>
         </form>
+        <label class="sort-control" for="conversation-sort">
+            Sort
+            <select id="conversation-sort">
+                <option value="desc">Newest first</option>
+                <option value="asc">Oldest first</option>
+            </select>
+        </label>
         <ul id="conversation-list" class="conversation-list"></ul>
 
         <div class="user-box">

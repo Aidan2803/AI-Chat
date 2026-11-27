@@ -9,6 +9,7 @@ const elements = {
   conversationList: document.getElementById("conversation-list"),
   createForm: document.getElementById("create-conversation-form"),
   conversationTitleInput: document.getElementById("conversation-title"),
+  conversationSort: document.getElementById("conversation-sort"),
   chatTitle: document.getElementById("chat-title"),
   messages: document.getElementById("messages"),
   sendForm: document.getElementById("send-form"),
@@ -148,7 +149,8 @@ function renderMessages(messages) {
 
 async function loadConversations() {
   setStatus("");
-  state.conversations = await request("/chat/conversations");
+  const sort = elements.conversationSort.value;
+  state.conversations = await request(`/chat/conversations?sort=${encodeURIComponent(sort)}`);
   renderConversations();
 }
 
@@ -165,6 +167,14 @@ async function selectConversation(conversationId, title) {
   renderConversations();
   await loadConversationHistory(conversationId);
 }
+
+elements.conversationSort.addEventListener("change", async () => {
+  try {
+    await loadConversations();
+  } catch (error) {
+    setStatus(`Failed to sort conversations: ${error.message}`);
+  }
+});
 
 elements.createForm.addEventListener("submit", async (event) => {
   event.preventDefault();

@@ -87,11 +87,21 @@ public class ChatService {
     }
 
     public List<ConversationResponse> getAllConversations(String username){
-        ApplicationUser user = userRepository.findByUsername(username)
+        return getAllConversations(username, "desc");
+    }
+
+    public List<ConversationResponse> getAllConversations(String username, String sortDirection){
+        userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Logged in user " + username + " not found"));
 
-        return conversationRepository.findByUserUsername(username).stream()
-                .map(c -> new ConversationResponse(c.getId(), c.getTitle()))
+        List<Conversation> conversations = switch (sortDirection.toLowerCase()) {
+            case "asc" -> conversationRepository.findByUserUsernameOrderByCreatedAtAsc(username);
+            case "desc" -> conversationRepository.findByUserUsernameOrderByCreatedAtDesc(username);
+            default -> throw new IllegalArgumentException("Sort must be 'asc' or 'desc'");
+        };
+
+        return conversations.stream()
+                .map(c -> new ConversationResponse(c.getId(), c.getTitle(), c.getCreatedAt()))
                 .toList();
     }
 

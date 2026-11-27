@@ -19,7 +19,12 @@ public class ChatController {
     }
 
     @GetMapping("/conversations")
-    public List<ConversationResponse> allConversations( Principal principal){ return chatService.getAllConversations(principal.getName());}
+    public List<ConversationResponse> allConversations(
+            Principal principal,
+            @RequestParam(defaultValue = "desc") String sort
+    ){
+        return chatService.getAllConversations(principal.getName(), sort);
+    }
 
     @GetMapping("/conversation/{id}")
     public List<MessageResponse> conversationHistory(@PathVariable Long id, Principal principal){
@@ -29,7 +34,11 @@ public class ChatController {
     @PostMapping("/conversation/create")
     public ConversationResponse createConversation(@RequestBody ConversationRequest request, Principal principal){
         Conversation conversation = chatService.createConversation(request.title(), principal.getName());
-        return new ConversationResponse(conversation.getId(), conversation.getTitle());
+        return new ConversationResponse(
+                conversation.getId(),
+                conversation.getTitle(),
+                conversation.getCreatedAt()
+        );
     }
 
     @PostMapping("/conversation/{id}/sendMessage")
