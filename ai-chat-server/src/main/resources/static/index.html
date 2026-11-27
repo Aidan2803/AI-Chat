@@ -17,8 +17,10 @@
         <label class="sort-control" for="conversation-sort">
             Sort
             <select id="conversation-sort">
-                <option value="desc">Newest first</option>
-                <option value="asc">Oldest first</option>
+                <option value="descCreatedAt">Newest created first</option>
+                <option value="ascCreatedAt">Oldest created first</option>
+                <option value="descLastUpdatedAt">Newest updated first</option>
+                <option value="ascLastUpdatedAt">Oldest updated first</option>
             </select>
         </label>
         <ul id="conversation-list" class="conversation-list"></ul>

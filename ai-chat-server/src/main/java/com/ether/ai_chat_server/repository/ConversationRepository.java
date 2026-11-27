@@ -10,4 +10,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     List<Conversation> findByUserUsername(String username);
     List<Conversation> findByUserUsernameOrderByCreatedAtAsc(String username);
     List<Conversation> findByUserUsernameOrderByCreatedAtDesc(String username);
+    List<Conversation> findByUserUsernameOrderByLastUpdatedAtAsc(String name);
+    List<Conversation> findByUserUsernameOrderByLastUpdatedAtDesc(String name);
 }

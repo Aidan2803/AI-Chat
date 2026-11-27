@@ -21,7 +21,7 @@ public class ChatController {
     @GetMapping("/conversations")
     public List<ConversationResponse> allConversations(
             Principal principal,
-            @RequestParam(defaultValue = "desc") String sort
+            @RequestParam(defaultValue = "descCreatedAt") String sort
     ){
         return chatService.getAllConversations(principal.getName(), sort);
     }
@@ -37,7 +37,8 @@ public class ChatController {
         return new ConversationResponse(
                 conversation.getId(),
                 conversation.getTitle(),
-                conversation.getCreatedAt()
+                conversation.getCreatedAt(),
+                conversation.getLastUpdatedAt()
         );
     }
 

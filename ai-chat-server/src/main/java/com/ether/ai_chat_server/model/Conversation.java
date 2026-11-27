@@ -2,6 +2,7 @@ package com.ether.ai_chat_server.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ public class Conversation {
     @CreationTimestamp
     private Instant createdAt;
 
+    @UpdateTimestamp
+    private Instant lastUpdatedAt;
+
     public void setTitle(String title){this.title = title;}
     public String getTitle(){return title;}
     public Long getId(){return id;}
@@ -32,4 +36,5 @@ public class Conversation {
     public void setUser(ApplicationUser user) {this.user = user; }
     public ApplicationUser getUser(){return user;}
     public Instant getCreatedAt(){return createdAt;}
+    public Instant getLastUpdatedAt() {return lastUpdatedAt;}
 }
