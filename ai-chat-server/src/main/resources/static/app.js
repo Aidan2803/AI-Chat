@@ -15,6 +15,7 @@ const elements = {
   sendForm: document.getElementById("send-form"),
   messageInput: document.getElementById("message-input"),
   sendButton: document.getElementById("send-btn"),
+  renameConversationButton: document.getElementById("rename-conversation-btn"),
   deleteConversationButton: document.getElementById("delete-conversation-btn"),
   logoutButton: document.getElementById("logout-btn"),
   currentUsername: document.getElementById("current-username"),
@@ -81,6 +82,7 @@ async function request(path, options = {}) {
 function setConversationControlsEnabled(isEnabled) {
   elements.messageInput.disabled = !isEnabled;
   elements.sendButton.disabled = !isEnabled;
+  elements.renameConversationButton.disabled = !isEnabled;
   elements.deleteConversationButton.disabled = !isEnabled;
 }
 
@@ -228,6 +230,37 @@ elements.sendForm.addEventListener("submit", async (event) => {
     setStatus(`Failed to send message: ${error.message}`);
   } finally {
     elements.sendButton.disabled = false;
+  }
+});
+
+elements.renameConversationButton.addEventListener("click", async () => {
+  if (!state.selectedConversationId) {
+    return;
+  }
+
+  const newTitle = window.prompt("Rename conversation", state.selectedConversationTitle);
+  if (newTitle === null) {
+    return;
+  }
+
+  const trimmedTitle = newTitle.trim();
+  if (!trimmedTitle) {
+    setStatus("Conversation title is required.");
+    return;
+  }
+
+  setStatus("");
+  try {
+    await request(`/chat/conversation/${state.selectedConversationId}/edit`, {
+      method: "PATCH",
+      body: JSON.stringify({ newTitle: trimmedTitle }),
+    });
+
+    state.selectedConversationTitle = trimmedTitle;
+    elements.chatTitle.textContent = `${state.selectedConversationId}: ${trimmedTitle}`;
+    await loadConversations();
+  } catch (error) {
+    setStatus(`Failed to rename conversation: ${error.message}`);
   }
 });
 

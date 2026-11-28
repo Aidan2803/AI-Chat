@@ -34,7 +34,10 @@
     <main class="chat-panel">
         <header class="chat-header">
             <h2 id="chat-title">Select a conversation</h2>
-            <button id="delete-conversation-btn" class="danger" disabled>Delete</button>
+            <div class="chat-actions">
+                <button id="rename-conversation-btn" class="secondary" disabled>Rename</button>
+                <button id="delete-conversation-btn" class="danger" disabled>Delete</button>
+            </div>
         </header>
 
         <section id="messages" class="messages"></section>

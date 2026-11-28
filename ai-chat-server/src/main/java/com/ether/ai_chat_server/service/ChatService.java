@@ -107,10 +107,23 @@ public class ChatService {
                 .toList();
     }
 
-    public void deleteConversation(Long id){
+    public void deleteConversation(Long id, String username){
+        ApplicationUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Logged in user " + username + " not found"));
+
         if (!conversationRepository.existsById(id)){
             throw new ConversationNotFoundException("Conversation " + id + "not found");
         }
         conversationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void editConversationTitle(Long id, String newTitle, String username) {
+        ApplicationUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Logged in user " + username + " not found"));
+
+        Conversation toUpdate = conversationRepository.findById(id)
+                .orElseThrow(() -> new ConversationNotFoundException("Conversation " + id + " not found"));
+        toUpdate.setTitle(newTitle);
     }
 }

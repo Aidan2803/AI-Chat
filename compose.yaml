@@ -40,6 +40,12 @@ services:
         condition: service_healthy
     restart: "no"
 
+  test:
+    profiles: ["test"]
+    build:
+      context: ./ai-chat-server
+      target: test
+
   app:
     build:
       context: ./ai-chat-server

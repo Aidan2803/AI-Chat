@@ -122,6 +122,15 @@ button:disabled {
   margin: 0;
 }
 
+.chat-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-actions .secondary {
+  background: #6c757d;
+}
+
 .messages {
   background: #fff;
   border: 1px solid #dde2f0;

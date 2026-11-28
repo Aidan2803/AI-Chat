@@ -7,6 +7,9 @@ RUN mvn --batch-mode dependency:go-offline
 COPY src ./src
 RUN mvn --batch-mode -DskipTests package
 
+FROM build AS test
+CMD ["mvn", "--batch-mode", "test"]
+
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 

@@ -50,7 +50,13 @@ public class ChatController {
 
     @DeleteMapping("/conversation/{id}/delete")
     public ResponseEntity<Void> deleteConversation(@PathVariable Long id, Principal principal){
-        chatService.deleteConversation(id);
+        chatService.deleteConversation(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/conversation/{id}/edit")
+    public ResponseEntity<Void> editConversationTitle(@PathVariable Long id, @RequestBody ConversationEditRequest request, Principal principal){
+        chatService.editConversationTitle(id, request.newTitle(), principal.getName());
         return ResponseEntity.noContent().build();
     }
 }

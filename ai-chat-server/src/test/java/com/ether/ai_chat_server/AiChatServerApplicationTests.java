@@ -144,7 +144,7 @@ class AiChatServerApplicationTests {
 		when(conversationRepository.findByUserUsernameOrderByCreatedAtAsc("dummyUser"))
 				.thenReturn(List.of(older, newer));
 
-		List<ConversationResponse> result = chatService.getAllConversations("dummyUser", "asc");
+		List<ConversationResponse> result = chatService.getAllConversations("dummyUser", "ascCreatedAt");
 
 		assertEquals(List.of("Older conversation", "Newer conversation"),
 				result.stream().map(ConversationResponse::title).toList());
@@ -172,16 +172,34 @@ class AiChatServerApplicationTests {
 
 	@Test
 	void deleteConversationWorks(){
+		String dummyUser = "dummyUser";
+		String dummyHash = "dummyHash";
+
+		ApplicationUser user = new ApplicationUser(dummyUser, dummyHash);
+
+		when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
 		when(conversationRepository.existsById(1L)).thenReturn(true);
 
-		chatService.deleteConversation(1L);
+		chatService.deleteConversation(1L, dummyUser);
 
 		verify(conversationRepository, times(1)).deleteById(1L);
 	}
 
 	@Test
 	void deleteConversationThrows(){
+		String dummyUser = "dummyUser";
+		String dummyHash = "dummyHash";
+
+		ApplicationUser user = new ApplicationUser(dummyUser, dummyHash);
+		when(userRepository.findByUsername("dummyUser")).thenReturn(Optional.of(user));
+
 		when(conversationRepository.existsById(1L)).thenReturn(false);
-		assertThrows(ConversationNotFoundException.class, () -> chatService.deleteConversation(1L));
+		assertThrows(ConversationNotFoundException.class, () -> chatService.deleteConversation(1L, dummyUser));
+	}
+
+	@Test
+	void deleteConversationThrowsWithoutUser() {
+		String dummyUser = "dummyUser";
+		assertThrows(IllegalStateException.class, () -> chatService.deleteConversation(1L, dummyUser));
 	}
 }
